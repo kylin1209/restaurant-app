@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Deliverer implements Serializable {
     private String username;
-    private String password; // In a real app, you would hash this
+    private String password; // to be implemented with login logic later
     private List<Order> pastDeliveries;
     private Order currentOrder;
 
