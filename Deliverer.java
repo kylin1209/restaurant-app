@@ -32,7 +32,7 @@ public class Deliverer implements Serializable {
         if (this.currentOrder == null) {
             this.currentOrder = order;
         } else {
-            // In a full application, this would show an error message on the GUI.
+            // error message
             System.err.println("Deliverer already has an active order.");
         }
     }
@@ -46,7 +46,7 @@ public class Deliverer implements Serializable {
             this.pastDeliveries.add(this.currentOrder);
             this.currentOrder = null;
         } else {
-            // In a full application, this would show an error message on the GUI.
+            // Error message
             System.err.println("No active order to deliver.");
         }
     }
