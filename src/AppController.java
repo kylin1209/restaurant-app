@@ -20,6 +20,11 @@ public class AppController {
     private Deliverer currentDeliverer;
     private Customer currentCustomer;
     private List<Order> allOrders;
+    private Menu menu; // Added for customer order menu
+
+    // GUI instances to maintain state and allow updates
+    private DelivererBookOrderGUI delivererBookOrderGUI;
+
 
     /**
      * Constructor for the AppController.
@@ -27,6 +32,7 @@ public class AppController {
      */
     public AppController() {
         this.allOrders = new ArrayList<>();
+        this.menu = new Menu(); // Initialize menu
         this.mainFrame = new JFrame("Deliverer Application");
         this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.mainFrame.setSize(800, 600);
@@ -42,16 +48,33 @@ public class AppController {
         this.currentCustomer = new Customer("c_jones", "pass456", "456 Oak Ave");
 
         // Simulate some pending orders
-        this.allOrders.add(new Order("101", "Pending", "123 Main St."));
-        this.allOrders.add(new Order("102", "Pending", "456 Pine Blvd."));
-        this.allOrders.add(new Order("103", "Pending", "789 Elm Rd."));
+        // Ensure Order constructor matches the one in Order.java (with List<MenuItem> items)
+        List<MenuItem> dummyItems1 = new ArrayList<>();
+        dummyItems1.add(new MenuItem("Burger", 10.00));
+        dummyItems1.add(new MenuItem("Fries", 3.00));
+        this.allOrders.add(new Order("101", "Pending", "123 Main St.", dummyItems1));
+
+        List<MenuItem> dummyItems2 = new ArrayList<>();
+        dummyItems2.add(new MenuItem("Pizza", 15.00));
+        this.allOrders.add(new Order("102", "Pending", "456 Pine Blvd.", dummyItems2));
+
+        List<MenuItem> dummyItems3 = new ArrayList<>();
+        dummyItems3.add(new MenuItem("Salad", 8.00));
+        this.allOrders.add(new Order("103", "Pending", "789 Elm Rd.", dummyItems3));
         
         // Simulate a past order for the deliverer
-        Order pastDelivery = new Order("001", "Delivered", "999 Delivery St.");
+        List<MenuItem> pastItems = new ArrayList<>();
+        pastItems.add(new MenuItem("Coffee", 2.50));
+        Order pastDelivery = new Order("001", "Delivered", "999 Delivery St.", pastItems);
         this.currentDeliverer.getPastDeliveries().add(pastDelivery);
 
         // Simulate a past order for the customer
-        this.currentCustomer.getPastOrders().add(new Order("C-001", "Delivered", "456 Oak Ave"));
+        List<MenuItem> customerPastItems = new ArrayList<>();
+        customerPastItems.add(new MenuItem("Sandwich", 7.00));
+        this.currentCustomer.getPastOrders().add(new Order("C-001", "Delivered", "456 Oak Ave", customerPastItems));
+
+        // Initialize the DelivererBookOrderGUI here
+        this.delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
 
         // Start the application by showing the deliverer's main booking screen
         showDelivererBookOrderGUI();
@@ -73,13 +96,14 @@ public class AppController {
      * Displays the main deliverer booking GUI.
      */
     public void showDelivererBookOrderGUI() {
-        // Filter for pending orders
-        List<Order> pendingOrders = allOrders.stream()
-            .filter(order -> order.getStatus().equals("Pending"))
-            .collect(Collectors.toList());
-        
-        DelivererBookOrderGUI bookingGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
-        switchPanel(bookingGUI);
+        // The bookingGUI is now an instance variable and its update methods are called
+        if (delivererBookOrderGUI == null) {
+            delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
+        }
+        delivererBookOrderGUI.updateOrderList();
+        delivererBookOrderGUI.updateCurrentOrderDisplay();
+        delivererBookOrderGUI.updateButtonStates();
+        switchPanel(delivererBookOrderGUI);
     }
 
     /**
@@ -102,6 +126,7 @@ public class AppController {
      */
     public void showDelivererPastOrdersGUI() {
         DelivererPastOrdersGUI pastOrdersGUI = new DelivererPastOrdersGUI(this, currentDeliverer);
+        pastOrdersGUI.refreshPastDeliveries(); // Ensure the list is updated
         switchPanel(pastOrdersGUI);
     }
     
@@ -133,7 +158,9 @@ public class AppController {
         Order orderToBook = findOrderById(orderId);
         if (orderToBook != null && orderToBook.getStatus().equals("Pending")) {
             currentDeliverer.bookOrder(orderToBook);
-            // Status remains 'Pending' until pickup is confirmed
+            orderToBook.setStatus("Picked Up"); // Status changes directly to "Picked Up" upon booking
+            // No direct customer GUI update here yet, as per previous discussion.
+            // This will be handled when connecting customer side.
             showDelivererOrderDetailsGUI(orderToBook); // Navigate to the details screen with the booked order
         } else {
             JOptionPane.showMessageDialog(mainFrame, "Order not found or is no longer available.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -145,9 +172,11 @@ public class AppController {
      */
     public void handleOrderPickup() {
         if (currentDeliverer.getCurrentOrder() != null) {
-            // Now we change the status when the order is picked up
-            currentDeliverer.getCurrentOrder().setStatus("Picked Up");
+            // The status is already "Picked Up" from booking, as per the latest request.
+            // This method now serves as a confirmation of physical pickup.
             JOptionPane.showMessageDialog(mainFrame, "Order picked up. Please proceed to delivery.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            // No explicit status change here as it's already "Picked Up"
+            // The DelivererOrderDetailsGUI's statusLabel is updated directly in its ActionListener.
         }
     }
 
@@ -182,12 +211,16 @@ public class AppController {
         initializeApp();
     }
 
+    // ====================================================================================
+    // Utility Method
+    // ====================================================================================
+
     /**
      * Finds an order in the list by its ID.
      * @param orderId The ID of the order to find.
      * @return The Order object if found, otherwise null.
      */
-    private Order findOrderById(String orderId) {
+    public Order findOrderById(String orderId) {
         for (Order order : allOrders) {
             if (order.getOrderID().equals(orderId)) {
                 return order;

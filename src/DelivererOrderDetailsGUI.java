@@ -14,6 +14,7 @@ public class DelivererOrderDetailsGUI extends JPanel {
 
     private JButton pickupDeliveredButton;
     private JButton cancelButton;
+    // private JLabel statusLabel; // Removed statusLabel declaration
 
     public DelivererOrderDetailsGUI(AppController controller, Order order) {
         this.controller = controller;
@@ -36,20 +37,25 @@ public class DelivererOrderDetailsGUI extends JPanel {
         // Main details panel
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new GridLayout(0, 1, 5, 5));
-        detailsPanel.setBorder(BorderFactory.createTitledBorder("Details"));
+        detailsPanel.setBorder(BorderFactory.createTitledBorder("Order Information"));
 
-        JLabel idLabel = new JLabel("Order ID: " + order.getOrderID());
-        JLabel statusLabel = new JLabel("Status: " + order.getStatus());
-        JLabel addressLabel = new JLabel("Destination: " + order.getDestinationAddress());
+        detailsPanel.add(new JLabel("Order ID: " + order.getOrderID()));
+        detailsPanel.add(new JLabel("Customer Address: " + order.getDestinationAddress()));
+        
+        // Status Label - Removed this section
+        // statusLabel = new JLabel("Status: " + order.getStatus());
+        // statusLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        // detailsPanel.add(statusLabel);
 
-        idLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        addressLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-
-        detailsPanel.add(idLabel);
-        detailsPanel.add(statusLabel);
-        detailsPanel.add(addressLabel);
-
+        // Items in the order
+        detailsPanel.add(new JLabel("Items: "));
+        if (order.getItems() != null) {
+            for (MenuItem item : order.getItems()) {
+                detailsPanel.add(new JLabel(" - " + item.getName() + " ($" + String.format("%.2f", item.getPrice()) + ")"));
+            }
+        }
+        detailsPanel.add(new JLabel("Total Price: $" + String.format("%.2f", order.getTotalPrice())));
+        
         add(detailsPanel, BorderLayout.CENTER);
 
         // Bottom Panel with buttons
@@ -69,7 +75,8 @@ public class DelivererOrderDetailsGUI extends JPanel {
                 pickupDeliveredButton.setText("Order Delivered");
                 cancelButton.setEnabled(false);
                 isOrderPickedUp = true;
-                controller.handleOrderPickup();
+                controller.handleOrderPickup(); // Update the model
+                // statusLabel.setText("Status: Picked Up"); // Removed update to statusLabel
             } else {
                 controller.handleOrderDelivered();
             }
@@ -79,7 +86,7 @@ public class DelivererOrderDetailsGUI extends JPanel {
             if (isOrderPickedUp) {
                 JOptionPane.showMessageDialog(this, "You cannot cancel an order that has been picked up.", "Cannot Cancel", JOptionPane.WARNING_MESSAGE);
             } else {
-                controller.showDelivererBookOrderGUI();
+                controller.returnToDelivererMenu();
             }
         });
 

@@ -19,9 +19,11 @@ public class DelivererPastOrdersGUI extends JPanel {
     private AppController controller;
     private DefaultListModel<String> pastDeliveriesListModel;
     private JList<String> pastDeliveriesJList;
+    private Deliverer deliverer; // Added as an instance variable
 
     public DelivererPastOrdersGUI(AppController controller, Deliverer deliverer) {
         this.controller = controller;
+        this.deliverer = deliverer; // Initialize the instance variable
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -47,11 +49,6 @@ public class DelivererPastOrdersGUI extends JPanel {
 
         // Create the list of past deliveries
         pastDeliveriesListModel = new DefaultListModel<>();
-        if (deliverer != null && deliverer.getPastDeliveries() != null) {
-            for (Order order : deliverer.getPastDeliveries()) {
-                pastDeliveriesListModel.addElement("Delivered Order ID: " + order.getOrderID() + " to " + order.getDestinationAddress());
-            }
-        }
         pastDeliveriesJList = new JList<>(pastDeliveriesListModel);
         pastDeliveriesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         pastDeliveriesJList.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -61,6 +58,20 @@ public class DelivererPastOrdersGUI extends JPanel {
         // A simple message at the bottom
         JLabel messageLabel = new JLabel("Completed deliveries are listed above.", SwingConstants.CENTER);
         add(messageLabel, BorderLayout.SOUTH);
+
+        refreshPastDeliveries(); // Call refresh on initialization
+    }
+
+    /**
+     * Refreshes the list of past deliveries displayed in the GUI.
+     */
+    public void refreshPastDeliveries() { // Made public and added implementation
+        pastDeliveriesListModel.clear();
+        if (deliverer != null && deliverer.getPastDeliveries() != null) {
+            for (Order order : deliverer.getPastDeliveries()) {
+                pastDeliveriesListModel.addElement("Delivered Order ID: " + order.getOrderID() + " to " + order.getDestinationAddress());
+            }
+        }
     }
 }
 

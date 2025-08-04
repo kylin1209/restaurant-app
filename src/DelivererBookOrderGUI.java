@@ -136,7 +136,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Updates all dynamic components of the GUI.
      */
-    private void updateGUI() {
+    public void updateGUI() {
         updateCurrentOrderDisplay();
         updateOrderList();
         updateButtonStates();
@@ -145,7 +145,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Populates the list of available pending orders.
      */
-    private void updateOrderList() {
+    public void updateOrderList() {
         pendingOrderListModel.clear();
         for (Order order : allOrders) {
             if (order.getStatus().equals("Pending")) {
@@ -157,7 +157,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Updates the display for the currently active order.
      */
-    private void updateCurrentOrderDisplay() {
+    public void updateCurrentOrderDisplay() {
         if (deliverer.getCurrentOrder() != null) {
             Order currentOrder = deliverer.getCurrentOrder();
             currentOrderLabel.setText("<html><div style='text-align: center;'>Active Order ID: " + currentOrder.getOrderID() + "<br>Address: " + currentOrder.getDestinationAddress() + "</div></html>");
@@ -173,7 +173,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Enables/disables buttons based on the presence of an active order.
      */
-    private void updateButtonStates() {
+    public void updateButtonStates() {
         boolean hasActiveOrder = deliverer.getCurrentOrder() != null;
         bookButton.setEnabled(!hasActiveOrder);
         pendingOrderJList.setEnabled(!hasActiveOrder);
