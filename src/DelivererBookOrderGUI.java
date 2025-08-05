@@ -19,6 +19,12 @@ public class DelivererBookOrderGUI extends JPanel {
     private JButton deliverButton;
     private JLabel currentOrderLabel;
 
+    /**
+     * Constructor for DelivererBookOrderGUI.
+     * @param controller The main application controller.
+     * @param deliverer The current deliverer.
+     * @param allOrders A list of all orders in the system.
+     */
     public DelivererBookOrderGUI(AppController controller, Deliverer deliverer, List<Order> allOrders) {
         this.controller = controller;
         this.deliverer = deliverer;
@@ -37,11 +43,11 @@ public class DelivererBookOrderGUI extends JPanel {
         menuButton.setFont(new Font("Arial", Font.PLAIN, 14));
         leftTopPanel.add(menuButton);
         
-        // Right side for back button
+        // Right side for back button (assuming this is for a general back, not specific to menu)
         JPanel rightTopPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        backButton.addActionListener(e -> controller.returnToDelivererMenu());
+        backButton.addActionListener(e -> controller.returnToDelivererMenu()); // This should go back to the main deliverer menu
         rightTopPanel.add(backButton);
 
         // Add to top panel
@@ -51,7 +57,8 @@ public class DelivererBookOrderGUI extends JPanel {
         // Hamburger menu popup
         JPopupMenu hamburgerMenu = new JPopupMenu();
         JMenuItem pastDeliveriesItem = new JMenuItem("Past Deliveries");
-        pastDeliveriesItem.addActionListener(e -> controller.showPastDeliveriesGUI());
+        // This line calls showPastDeliveriesGUI() on the controller instance
+        pastDeliveriesItem.addActionListener(e -> controller.showDelivererPastOrdersGUI()); // Corrected to call showDelivererPastOrdersGUI
         JMenuItem logoutItem = new JMenuItem("Log Out");
         logoutItem.addActionListener(e -> controller.showLoginGUI());
         hamburgerMenu.add(pastDeliveriesItem);
@@ -117,7 +124,7 @@ public class DelivererBookOrderGUI extends JPanel {
             if (selectedIndex != -1) {
                 String selectedOrderText = pendingOrderJList.getSelectedValue();
                 String orderId = selectedOrderText.split(" \\| ")[0].split(": ")[1];
-                controller.handleBookOrder(orderId);
+                controller.handleBookOrder(orderId); // This calls the AppController's method
             } else {
                 JOptionPane.showMessageDialog(this, "Please select an order to book.", "No Order Selected", JOptionPane.WARNING_MESSAGE);
             }
@@ -127,10 +134,6 @@ public class DelivererBookOrderGUI extends JPanel {
         add(centerPanel, BorderLayout.CENTER);
 
         updateGUI();
-    }
-
-    public DelivererBookOrderGUI(AppController appController, Deliverer currentDeliverer) {
-        //TODO Auto-generated constructor stub
     }
 
     /**
@@ -145,7 +148,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Populates the list of available pending orders.
      */
-    public void updateOrderList() {
+    public void updateOrderList() { // Changed to public
         pendingOrderListModel.clear();
         for (Order order : allOrders) {
             if (order.getStatus().equals("Pending")) {
@@ -157,7 +160,7 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Updates the display for the currently active order.
      */
-    public void updateCurrentOrderDisplay() {
+    public void updateCurrentOrderDisplay() { // Changed to public
         if (deliverer.getCurrentOrder() != null) {
             Order currentOrder = deliverer.getCurrentOrder();
             currentOrderLabel.setText("<html><div style='text-align: center;'>Active Order ID: " + currentOrder.getOrderID() + "<br>Address: " + currentOrder.getDestinationAddress() + "</div></html>");
@@ -173,9 +176,10 @@ public class DelivererBookOrderGUI extends JPanel {
     /**
      * Enables/disables buttons based on the presence of an active order.
      */
-    public void updateButtonStates() {
+    public void updateButtonStates() { // Changed to public
         boolean hasActiveOrder = deliverer.getCurrentOrder() != null;
         bookButton.setEnabled(!hasActiveOrder);
         pendingOrderJList.setEnabled(!hasActiveOrder);
+        deliverButton.setEnabled(hasActiveOrder); // Ensure deliverButton is enabled/disabled correctly
     }
 }

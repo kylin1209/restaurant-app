@@ -10,15 +10,23 @@ import java.util.List;
 public class DelivererOrderDetailsGUI extends JPanel {
     private AppController controller;
     private Order order;
-    private boolean isOrderPickedUp = false;
+    private boolean isOrderPickedUp; // Flag to track if the order has been picked up
 
     private JButton pickupDeliveredButton;
     private JButton cancelButton;
-    // private JLabel statusLabel; // Removed statusLabel declaration
 
+    /**
+     * Constructor for DelivererOrderDetailsGUI.
+     * @param controller The main application controller.
+     * @param order The order whose details are to be displayed.
+     */
     public DelivererOrderDetailsGUI(AppController controller, Order order) {
         this.controller = controller;
         this.order = order;
+        
+        // Initialize isOrderPickedUp based on the current order status
+        this.isOrderPickedUp = order.getStatus().equals("Picked Up");
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -29,6 +37,7 @@ public class DelivererOrderDetailsGUI extends JPanel {
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
         JButton backButton = new JButton("Back");
+        // Back button action: returns to the deliverer menu, clearing any 'currentlyViewedOrder'
         backButton.addActionListener(e -> controller.returnToDelivererMenu());
         topPanel.add(backButton, BorderLayout.WEST);
 
@@ -42,11 +51,6 @@ public class DelivererOrderDetailsGUI extends JPanel {
         detailsPanel.add(new JLabel("Order ID: " + order.getOrderID()));
         detailsPanel.add(new JLabel("Customer Address: " + order.getDestinationAddress()));
         
-        // Status Label - Removed this section
-        // statusLabel = new JLabel("Status: " + order.getStatus());
-        // statusLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        // detailsPanel.add(statusLabel);
-
         // Items in the order
         detailsPanel.add(new JLabel("Items: "));
         if (order.getItems() != null) {
@@ -62,30 +66,43 @@ public class DelivererOrderDetailsGUI extends JPanel {
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         
-        pickupDeliveredButton = new JButton("Order Pickup");
+        pickupDeliveredButton = new JButton(); // Initialize without text
         pickupDeliveredButton.setFont(new Font("Arial", Font.BOLD, 16));
         
         cancelButton = new JButton("Cancel");
         cancelButton.setFont(new Font("Arial", Font.BOLD, 16));
         
+        // Set initial button text and enabled state based on order status
+        if (isOrderPickedUp) {
+            pickupDeliveredButton.setText("Order Delivered");
+            cancelButton.setEnabled(false); // Cannot cancel once picked up
+        } else {
+            pickupDeliveredButton.setText("Order Pickup");
+            cancelButton.setEnabled(true);
+        }
+
         // Add action listeners
         pickupDeliveredButton.addActionListener(e -> {
             if (!isOrderPickedUp) {
+                // If the order hasn't been picked up yet, this button acts as "Order Pickup"
                 // Change button text and state
                 pickupDeliveredButton.setText("Order Delivered");
-                cancelButton.setEnabled(false);
-                isOrderPickedUp = true;
-                controller.handleOrderPickup(); // Update the model
-                // statusLabel.setText("Status: Picked Up"); // Removed update to statusLabel
+                cancelButton.setEnabled(false); // Cannot cancel once picked up
+                isOrderPickedUp = true; // Mark as picked up in this GUI instance
+                controller.handleOrderPickup(); // Delegate actual model update to AppController
             } else {
-                controller.handleOrderDelivered();
+                // If the order has already been picked up, this button acts as "Order Delivered"
+                controller.handleOrderDelivered(); // Delegate delivery completion to AppController
             }
         });
 
         cancelButton.addActionListener(e -> {
             if (isOrderPickedUp) {
+                // If the order has been picked up, it cannot be cancelled
                 JOptionPane.showMessageDialog(this, "You cannot cancel an order that has been picked up.", "Cannot Cancel", JOptionPane.WARNING_MESSAGE);
             } else {
+                // If not picked up, simply return to the previous menu.
+                // The order's status in the model (AppController) is still "Pending".
                 controller.returnToDelivererMenu();
             }
         });
