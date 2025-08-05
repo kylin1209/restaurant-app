@@ -22,9 +22,9 @@ public class AppController {
 
     // GUI instances to maintain state and allow updates
     private DelivererBookOrderGUI delivererBookOrderGUI;
-    private LoginSelectionGUI loginSelectionGUI; // New
-    private DelivererLoginGUI delivererLoginGUI; // New
-    private DelivererSignUpGUI delivererSignUpGUI; // New
+    private LoginSelectionGUI loginSelectionGUI;
+    private DelivererLoginGUI delivererLoginGUI;
+    private DelivererSignUpGUI delivererSignUpGUI;
 
     // A temporary holder for the order currently being viewed in DelivererOrderDetailsGUI
     private Order currentlyViewedOrder;
@@ -37,17 +37,27 @@ public class AppController {
     public AppController() {
         this.allOrders = new ArrayList<>();
         this.mainFrame = new JFrame("Deliverer Application");
-        this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Ensure application exits on close
         this.mainFrame.setSize(800, 600);
         this.mainFrame.setLocationRelativeTo(null);
+
+        // Add a WindowListener to save accounts when the frame is closing
+        this.mainFrame.addWindowListener(new java.awt.event.WindowAdapter() { // Using fully qualified name
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) { // Using fully qualified name
+                AccountManager.getInstance().saveAccounts();
+            }
+        });
     }
 
     /**
      * Initializes the application with dummy data and shows the initial GUI.
      */
     public void initializeApp() {
-        // Initialize AccountManager and add dummy deliverer accounts
+        // Initialize AccountManager (this will also attempt to load existing accounts)
         AccountManager accountManager = AccountManager.getInstance();
+        
+        // Add dummy deliverer accounts ONLY if no accounts were loaded
         if (accountManager.getDelivererAccounts().isEmpty()) {
             accountManager.getDelivererAccounts().add(new Deliverer("d_smith", "pass123"));
             accountManager.getDelivererAccounts().add(new Deliverer("john_doe", "password"));
@@ -59,6 +69,8 @@ public class AppController {
         this.currentCustomer = accountManager.getCustomerAccounts().get(0); // Set a dummy customer for order creation
 
         // Create some dummy orders with MenuItems directly
+        // These orders will be added to the allOrders list, which is not persisted
+        // In a real app, orders would likely be managed by a separate persistence mechanism
         List<MenuItem> order1Items = new ArrayList<>();
         order1Items.add(new MenuItem("Burger", 10.00));
         order1Items.add(new MenuItem("Fries", 3.00));
@@ -100,6 +112,10 @@ public class AppController {
         mainFrame.setVisible(true);
     }
     
+    // ===================================================================================
+    // Login/Signup GUI Navigation
+    // ===================================================================================
+
     /**
      * Displays the initial login selection GUI.
      */
@@ -174,10 +190,17 @@ public class AppController {
         // Create new deliverer account
         Deliverer newDeliverer = new Deliverer(username, password);
         accountManager.getDelivererAccounts().add(newDeliverer);
+        // Save accounts immediately after a new one is created
+        accountManager.saveAccounts(); 
         JOptionPane.showMessageDialog(mainFrame, "Account created successfully! Please log in.", "Sign Up Success", JOptionPane.INFORMATION_MESSAGE);
         showDelivererLoginGUI(); // Go back to login screen after successful signup
     }
 
+
+    // ===================================================================================
+    // Deliverer GUI Navigation and Actions
+    // ===================================================================================
+    
     /**
      * Displays the main deliverer booking GUI, refreshing its content.
      */
@@ -186,9 +209,9 @@ public class AppController {
         if (delivererBookOrderGUI == null) {
             delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
         } else {
-            // Update the deliverer instance in the existing GUI if it changed
-            // This is important if a new deliverer logs in
-            delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders); // Re-initialize for simplicity
+            // Re-initialize for simplicity to ensure it uses the newly logged-in deliverer
+            // and updated allOrders list if any changes occurred.
+            delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders); 
         }
         delivererBookOrderGUI.updateOrderList();
         delivererBookOrderGUI.updateCurrentOrderDisplay();
@@ -246,6 +269,9 @@ public class AppController {
             // Update the order status
             this.currentlyViewedOrder.setStatus("Picked Up");
             
+            // Save accounts after an order is picked up
+            AccountManager.getInstance().saveAccounts();
+
             JOptionPane.showMessageDialog(mainFrame, "Order " + this.currentlyViewedOrder.getOrderID() + " has been picked up. Please proceed to delivery.", "Success", JOptionPane.INFORMATION_MESSAGE);
             
             // Re-display the current details GUI to refresh its state
@@ -271,6 +297,9 @@ public class AppController {
             currentDeliverer.addPastDelivery(deliveredOrder);
             currentDeliverer.setCurrentOrder(null); // Clear the active order for the deliverer
             
+            // Save accounts after an order is delivered
+            AccountManager.getInstance().saveAccounts();
+
             showDelivererThankYouGUI(earnings); // Navigate to the thank you screen
         } else {
             JOptionPane.showMessageDialog(mainFrame, "No active order to deliver or order not yet picked up.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -312,6 +341,10 @@ public class AppController {
         this.currentlyViewedOrder = null; // Clear any viewed order
         showLoginSelectionGUI(); // Go back to the role selection screen
     }
+
+    // ===================================================================================
+    // Utility Method
+    // ===================================================================================
 
     /**
      * Finds an order in the list by its ID.

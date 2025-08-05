@@ -8,10 +8,11 @@ import java.util.List;
  * Serializable to save in between programs
  */
 public class Deliverer implements Serializable {
+    private static final long serialVersionUID = 1L; // Recommended for Serializable classes
     private String username;
     private String password;
-    private Order currentOrder;
-    private List<Order> pastDeliveries;
+    private Order currentOrder; // Note: Order must also be Serializable
+    private List<Order> pastDeliveries; // List of past delivered orders
 
     /**
      * Constructor for the Deliverer.
@@ -59,10 +60,13 @@ public class Deliverer implements Serializable {
     }
     
     /**
-     * Adds a completed order to the deliverer's list of past deliveries.
-     * @param order The order to add.
+     * Adds a completed delivery to the deliverer's past deliveries list.
+     * @param order The order that was delivered.
      */
     public void addPastDelivery(Order order) {
-        this.pastDeliveries.add(order);
+        if (order != null) {
+            this.pastDeliveries.add(order);
+        }
     }
 }
+
