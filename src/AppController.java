@@ -22,6 +22,9 @@ public class AppController {
 
     // GUI instances to maintain state and allow updates
     private DelivererBookOrderGUI delivererBookOrderGUI;
+    private LoginSelectionGUI loginSelectionGUI; // New
+    private DelivererLoginGUI delivererLoginGUI; // New
+    private DelivererSignUpGUI delivererSignUpGUI; // New
 
     // A temporary holder for the order currently being viewed in DelivererOrderDetailsGUI
     private Order currentlyViewedOrder;
@@ -43,9 +46,17 @@ public class AppController {
      * Initializes the application with dummy data and shows the initial GUI.
      */
     public void initializeApp() {
-        // We simulate a logged-in deliverer and customer for demonstration
-        this.currentDeliverer = new Deliverer("d_smith", "pass123");
-        this.currentCustomer = new Customer("c_jones", "pass456", "123 Main Street"); // Keep for Order creation
+        // Initialize AccountManager and add dummy deliverer accounts
+        AccountManager accountManager = AccountManager.getInstance();
+        if (accountManager.getDelivererAccounts().isEmpty()) {
+            accountManager.getDelivererAccounts().add(new Deliverer("d_smith", "pass123"));
+            accountManager.getDelivererAccounts().add(new Deliverer("john_doe", "password"));
+        }
+        // Initialize dummy customer account (if needed for order creation later)
+        if (accountManager.getCustomerAccounts().isEmpty()) {
+            accountManager.getCustomerAccounts().add(new Customer("c_jones", "pass456", "123 Main Street"));
+        }
+        this.currentCustomer = accountManager.getCustomerAccounts().get(0); // Set a dummy customer for order creation
 
         // Create some dummy orders with MenuItems directly
         List<MenuItem> order1Items = new ArrayList<>();
@@ -64,12 +75,14 @@ public class AppController {
         // Link customer to their dummy order (for testing delivery status updates)
         this.currentCustomer.setCurrentOrder(order1);
 
-        // Initialize deliverer-specific GUI panels
-        this.delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
+        // Initialize all main GUI panels
+        this.loginSelectionGUI = new LoginSelectionGUI(this);
+        this.delivererLoginGUI = new DelivererLoginGUI(this);
+        this.delivererSignUpGUI = new DelivererSignUpGUI(this);
+        // delivererBookOrderGUI will be initialized upon successful deliverer login
 
-
-        // Show the initial GUI (Deliverer's view for demonstration)
-        showDelivererBookOrderGUI();
+        // Show the initial GUI (Login Selection)
+        showLoginSelectionGUI();
         this.mainFrame.setVisible(true);
     }
 
@@ -87,14 +100,95 @@ public class AppController {
         mainFrame.setVisible(true);
     }
     
+    /**
+     * Displays the initial login selection GUI.
+     */
+    public void showLoginSelectionGUI() {
+        showPanel(loginSelectionGUI, "Welcome: Choose Role");
+    }
 
-    
+    /**
+     * Displays the deliverer login GUI.
+     */
+    public void showDelivererLoginGUI() {
+        showPanel(delivererLoginGUI, "Deliverer Login");
+    }
+
+    /**
+     * Displays the deliverer sign-up GUI.
+     */
+    public void showDelivererSignUpGUI() {
+        showPanel(delivererSignUpGUI, "Deliverer Sign Up");
+    }
+
+    /**
+     * Handles deliverer login attempt.
+     * @param username The entered username.
+     * @param password The entered password.
+     */
+    public void handleDelivererLogin(String username, String password) {
+        AccountManager accountManager = AccountManager.getInstance();
+        Deliverer foundDeliverer = null;
+        for (Deliverer d : accountManager.getDelivererAccounts()) {
+            if (d.getUsername().equals(username) && d.getPassword().equals(password)) {
+                foundDeliverer = d;
+                break;
+            }
+        }
+
+        if (foundDeliverer != null) {
+            this.currentDeliverer = foundDeliverer;
+            JOptionPane.showMessageDialog(mainFrame, "Login successful! Welcome, " + username + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
+            // After successful login, navigate to the deliverer's main screen
+            showDelivererBookOrderGUI();
+        } else {
+            JOptionPane.showMessageDialog(mainFrame, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Handles deliverer sign-up attempt.
+     * @param username The desired username.
+     * @param password The desired password.
+     * @param confirmPassword The confirmed password.
+     */
+    public void handleDelivererSignUp(String username, String password, String confirmPassword) {
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(mainFrame, "All fields are required.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(mainFrame, "Passwords do not match.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        AccountManager accountManager = AccountManager.getInstance();
+        // Check if username already exists
+        for (Deliverer d : accountManager.getDelivererAccounts()) {
+            if (d.getUsername().equals(username)) {
+                JOptionPane.showMessageDialog(mainFrame, "Username already exists. Please choose a different one.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        // Create new deliverer account
+        Deliverer newDeliverer = new Deliverer(username, password);
+        accountManager.getDelivererAccounts().add(newDeliverer);
+        JOptionPane.showMessageDialog(mainFrame, "Account created successfully! Please log in.", "Sign Up Success", JOptionPane.INFORMATION_MESSAGE);
+        showDelivererLoginGUI(); // Go back to login screen after successful signup
+    }
+
     /**
      * Displays the main deliverer booking GUI, refreshing its content.
      */
     public void showDelivererBookOrderGUI() {
+        // Ensure delivererBookOrderGUI is initialized only after a deliverer is logged in
         if (delivererBookOrderGUI == null) {
             delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders);
+        } else {
+            // Update the deliverer instance in the existing GUI if it changed
+            // This is important if a new deliverer logs in
+            delivererBookOrderGUI = new DelivererBookOrderGUI(this, currentDeliverer, allOrders); // Re-initialize for simplicity
         }
         delivererBookOrderGUI.updateOrderList();
         delivererBookOrderGUI.updateCurrentOrderDisplay();
@@ -133,7 +227,7 @@ public class AppController {
 
         Order orderToView = findOrderById(orderId);
         if (orderToView != null && orderToView.getStatus().equals("Pending")) {
-            // Only show details, do NOT assign or change status yet.
+            // ONLY show details, do NOT assign or change status yet.
             showDelivererOrderDetailsGUI(orderToView); 
         } else {
             JOptionPane.showMessageDialog(mainFrame, "Order not found or is no longer available.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -154,9 +248,9 @@ public class AppController {
             
             JOptionPane.showMessageDialog(mainFrame, "Order " + this.currentlyViewedOrder.getOrderID() + " has been picked up. Please proceed to delivery.", "Success", JOptionPane.INFORMATION_MESSAGE);
             
-            
             // Re-display the current details GUI to refresh its state
-            showDelivererOrderDetailsGUI(currentDeliverer.getCurrentOrder()); // Pass the now-active order
+            // This will ensure the button text changes to "Order Delivered"
+            showDelivererOrderDetailsGUI(currentDeliverer.getCurrentOrder()); 
         } else if (currentDeliverer.getCurrentOrder() != null && currentDeliverer.getCurrentOrder().getStatus().equals("Picked Up")) {
              // This case handles if they hit "Order Pickup" again after it's already picked up
              JOptionPane.showMessageDialog(mainFrame, "Order is already picked up.", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -211,15 +305,13 @@ public class AppController {
     }
     
     /**
-     * Placeholder method for a login GUI, as requested by the user's original code structure.
-     * For this example, it restarts the application flow.
+     * Handles logout, returning to the initial login selection screen.
      */
     public void showLoginGUI() {
-        JOptionPane.showMessageDialog(mainFrame, "Returning to a simulated login screen.", "Log Out", JOptionPane.INFORMATION_MESSAGE);
-        // For this example, we just restart the flow
-        initializeApp();
+        this.currentDeliverer = null; // Clear current deliverer on logout
+        this.currentlyViewedOrder = null; // Clear any viewed order
+        showLoginSelectionGUI(); // Go back to the role selection screen
     }
-
 
     /**
      * Finds an order in the list by its ID.
