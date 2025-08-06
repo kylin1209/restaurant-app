@@ -1,9 +1,14 @@
-package src;
+package main;
+
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -19,51 +24,39 @@ public class CustomerPastOrdersGUI extends JPanel{
 		setLayout(null);
 		
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(401, 11, 89, 23);
+		btnBack.setBounds(689, 11, 89, 23);
+		btnBack.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		controller.showCustomerOrderMenuGUI();
+        	}
+        });
 		add(btnBack);
 		
 		JButton btnHamburgerMenu = new JButton("☰ Menu");
 		btnHamburgerMenu.setBounds(10, 11, 89, 23);
+		btnHamburgerMenu.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		controller.showCustomerOtherOptGUI();
+        	}
+        });
 		add(btnHamburgerMenu);
 		
 		JLabel lblPastOrders = new JLabel("Past Orders");
 		lblPastOrders.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPastOrders.setFont(new Font("Arial", Font.BOLD, 24));
-		lblPastOrders.setBounds(152, 15, 172, 37);
+		lblPastOrders.setBounds(307, 15, 172, 37);
 		add(lblPastOrders);
 		
 		table = new JTable();
-		table.setModel(new DefaultTableModel(
-			new Object[][] {
-				{"Ordered Items", "Total"},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-				{null, null},
-			},
-			new String[] {
-				"Ordered Items", "Total"
-			}
-		));
+		DefaultTableModel tableModel = new DefaultTableModel(new String[] {"Order ID", "Total"}, 0);
+        for (Order order : customer.getPastOrders()) {
+        	tableModel.addRow(new Object[] {"Order ID: " + order.getOrderID(), "$" + String.format("$%.2f", order.getTotalPrice())});
+        }
+		table.setModel(tableModel);
 		table.getColumnModel().getColumn(0).setPreferredWidth(531);
-		table.setColumnSelectionAllowed(true);
-		table.setCellSelectionEnabled(true);
-		table.setBounds(41, 63, 414, 303);
-		add(table);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setBounds(41, 63, 693, 418);
+		add(scrollPane);
 	}
 
 	public AppController getController() {

@@ -1,9 +1,8 @@
-package src;
+package main;
+
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
 
 /**
  * Structure for customer orders to be accessed between both Deliverers and Customers
@@ -11,15 +10,17 @@ import java.util.*;
 public class Order implements Serializable {
     // Unique identifier for the serialized class
     private static final long serialVersionUID = 1L;
-
+    
+    public static int count = 0;
     private String orderID;
     private String status; // e.g., "Pending", "Booked", "Delivered"
     private String destinationAddress;
     private ArrayList<MenuItem> items; // Added to store menu items in the order
     private double totalPrice; // Added to store the total price of the order
 
-    public Order(String orderID, String status, String destinationAddress, List<MenuItem> items) {
-        this.orderID = orderID;
+    public Order(String status, String destinationAddress, List<MenuItem> items) {
+        count++;
+    	this.orderID = Integer.toString(count);
         this.status = status;
         this.destinationAddress = destinationAddress;
         this.items = items != null ? new ArrayList<>(items) : new ArrayList<>(); // Initialize items list

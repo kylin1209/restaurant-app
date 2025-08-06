@@ -1,21 +1,25 @@
-package src;
+package main;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The GUI for a deliverer to view and book orders.
  */
 public class DelivererBookOrderGUI extends JPanel {
-    private AppController controller;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
     private Deliverer deliverer;
     private List<Order> allOrders;
 
     private DefaultListModel<String> pendingOrderListModel;
     private JList<String> pendingOrderJList;
     private JButton bookButton;
+    // private JButton refreshButton;
     private JButton deliverButton;
     private JLabel currentOrderLabel;
 
@@ -26,7 +30,7 @@ public class DelivererBookOrderGUI extends JPanel {
      * @param allOrders A list of all orders in the system.
      */
     public DelivererBookOrderGUI(AppController controller, Deliverer deliverer, List<Order> allOrders) {
-        this.controller = controller;
+        this.setController(controller);
         this.deliverer = deliverer;
         this.allOrders = allOrders;
 
@@ -131,6 +135,19 @@ public class DelivererBookOrderGUI extends JPanel {
         });
         centerPanel.add(bookButton);
         
+//        refreshButton = new JButton("Book Selected Order");
+//        refreshButton.setFont(new Font("Arial", Font.BOLD, 16));
+//        refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        refreshButton.addActionListener(e -> {
+//        	pendingOrderListModel.clear();
+//            for (Order order : controller.getAllOrders()) {
+//                if (order.getStatus().equals("Pending")) {
+//                    pendingOrderListModel.addElement("Order ID: " + order.getOrderID() + " | To: " + order.getDestinationAddress());
+//                }
+//            }
+//        });
+//        centerPanel.add(refreshButton);
+        
         add(centerPanel, BorderLayout.CENTER);
 
         updateGUI();
@@ -182,4 +199,12 @@ public class DelivererBookOrderGUI extends JPanel {
         pendingOrderJList.setEnabled(!hasActiveOrder);
         deliverButton.setEnabled(hasActiveOrder); // Ensure deliverButton is enabled/disabled correctly
     }
+
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
 }

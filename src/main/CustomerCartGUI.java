@@ -1,9 +1,14 @@
-package src;
+package main;
+
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -19,62 +24,61 @@ public class CustomerCartGUI extends JPanel{
 		setLayout(null);
 		
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(401, 11, 89, 23);
+		btnBack.setBounds(690, 11, 89, 23);
+		btnBack.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		controller.showCustomerOrderMenuGUI();
+        	}
+        });
 		add(btnBack);
 		
 		JButton btnHamburgerMenu = new JButton("☰ Menu");
 		btnHamburgerMenu.setBounds(10, 11, 89, 23);
+		btnHamburgerMenu.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		controller.showCustomerOtherOptGUI();
+        	}
+        });
 		add(btnHamburgerMenu);
 		
 		JLabel lblCart = new JLabel("Cart");
         lblCart.setHorizontalAlignment(SwingConstants.CENTER);
         lblCart.setFont(new Font("Arial", Font.BOLD, 24));
-        lblCart.setBounds(162, 46, 172, 37);
+        lblCart.setBounds(124, 11, 546, 37);
         add(lblCart);
         
         table = new JTable();
-        table.setModel(new DefaultTableModel(
-        	new Object[][] {
-        		{"Name", "Price", "Servings"},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        		{null, null, null},
-        	},
-        	new String[] {
-        		"Name", "Price", "Servings"
-        	}
-        ));
-        table.getColumnModel().getColumn(2).setPreferredWidth(489);
-        table.setColumnSelectionAllowed(true);
-        table.setCellSelectionEnabled(true);
-        table.setBounds(46, 94, 414, 240);
-        add(table);
+        DefaultTableModel tableModel = new DefaultTableModel(new String[] {"Name", "Price"}, 0);
+        for (MenuItem item : customer.getCart()) {
+        	tableModel.addRow(new Object[] {item.getName(), String.format("$%.2f", item.getPrice())});
+        }
+        table.setModel(tableModel);
+        table.getColumnModel().getColumn(0).setPreferredWidth(545);
+        table.getColumnModel().getColumn(1).setPreferredWidth(15);
+        table.setBounds(37, 94, 707, 379);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(37, 94, 707, 379);
+        add(scrollPane);
         
         JLabel lblTotal = new JLabel("Total:");
         lblTotal.setHorizontalAlignment(SwingConstants.CENTER);
         lblTotal.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTotal.setBounds(10, 345, 114, 37);
+        lblTotal.setBounds(25, 484, 117, 37);
         add(lblTotal);
         
-        JLabel lblTotalPrice = new JLabel("<<totalPrice>>");
+        JLabel lblTotalPrice = new JLabel("$" + Double.toString(customer.getTotalCartPrice()));
         lblTotalPrice.setHorizontalAlignment(SwingConstants.LEFT);
         lblTotalPrice.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTotalPrice.setBounds(114, 345, 165, 37);
+        lblTotalPrice.setBounds(152, 484, 349, 37);
         add(lblTotalPrice);
         
         JButton btnCheckout = new JButton("Checkout");
-        btnCheckout.setBounds(401, 356, 89, 23);
+        btnCheckout.setBounds(655, 484, 89, 23);
+        btnCheckout.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		controller.showCustomerPaymentGUI();
+        	}
+        });
         add(btnCheckout);
 	}
 	public AppController getController() {

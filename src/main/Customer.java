@@ -1,4 +1,5 @@
-package src;
+package main;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -9,6 +10,7 @@ public class Customer implements Serializable{
     private String address;
     private ArrayList<Order> pastOrders;
     private ArrayList<MenuItem> cart;
+    private double totalCartPrice;
     private Order currentOrder;
     
 	public Customer(String username, String password, String address) {
@@ -18,6 +20,7 @@ public class Customer implements Serializable{
 		this.currentOrder = null;
 		this.pastOrders = new ArrayList<Order>();
 		this.cart = new ArrayList<MenuItem>();
+		this.setTotalCartPrice(0);
 	}
 
 	public String getUsername() {
@@ -52,14 +55,6 @@ public class Customer implements Serializable{
 		this.pastOrders = pastOrders;
 	}
 
-	public ArrayList<MenuItem> getCart() {
-		return cart;
-	}
-
-	public void setCart(ArrayList<MenuItem> cart) {
-		this.cart = cart;
-	}
-
 	public Order getCurrentOrder() {
 		return currentOrder;
 	}
@@ -71,6 +66,44 @@ public class Customer implements Serializable{
 	public void changeAddress(String newAddress) {
 		this.setAddress(newAddress);
 	}
+	
+	public void addToCart(MenuItem item) {
+		cart.add(item);
+		this.totalCartPrice = Math.round((totalCartPrice + item.getPrice()) * 100.0) / 100.0;
+	}
+
+	public double getTotalCartPrice() {
+		return totalCartPrice;
+	}
+
+	public void setTotalCartPrice(int totalPrice) {
+		this.totalCartPrice = totalPrice;
+	}
+
+	public ArrayList<MenuItem> getCart() {
+		return cart;
+	}
+
+	public void setCart(ArrayList<MenuItem> cart) {
+		this.cart = cart;
+	}
+	
+	public void addToPastOrders(Order order) {
+		pastOrders.add(order);
+	}
+	
+	public void resetCart() {
+		cart.clear();
+		this.totalCartPrice = 0;
+	}
+	
+	public void removeFromCart(int index) {
+		this.totalCartPrice = Math.round((this.totalCartPrice - cart.get(index).getPrice()) * 100.0) / 100.0;
+		cart.remove(index);
+	}
+	
+	
+
     
 	
     

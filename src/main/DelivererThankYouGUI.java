@@ -1,18 +1,20 @@
-package src;
+package main;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * A simple GUI to thank the deliverer after a delivery and show their earnings.
  */
 public class DelivererThankYouGUI extends JPanel {
-    private AppController controller;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
 
     public DelivererThankYouGUI(AppController controller, double earnings) {
-        this.controller = controller;
+        this.setController(controller);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(50, 20, 50, 20));
 
@@ -35,4 +37,12 @@ public class DelivererThankYouGUI extends JPanel {
         buttonPanel.add(backButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
+
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
 }

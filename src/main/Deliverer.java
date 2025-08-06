@@ -1,4 +1,5 @@
-package src;
+package main;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,4 +70,3 @@ public class Deliverer implements Serializable {
         }
     }
 }
-

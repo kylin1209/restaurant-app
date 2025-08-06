@@ -1,4 +1,5 @@
-package src;
+package main;
+
 import java.io.Serializable;
 
 /**
@@ -14,6 +15,7 @@ public class MenuItem implements Serializable {
     // Instance variables to store the name and price of the menu item.
     private String name;
     private double price;
+    private String filter;
 
     /**
      * Constructor for the MenuItem class.
@@ -24,6 +26,12 @@ public class MenuItem implements Serializable {
     public MenuItem(String name, double price) {
         this.name = name;
         this.price = price;
+    }
+    
+    public MenuItem(String name, double price, String filter) {
+    	this.name = name;
+        this.price = price;
+        this.filter = filter;
     }
 
     /**
@@ -52,5 +60,13 @@ public class MenuItem implements Serializable {
     public String toString() {
         return name + " - $" + String.format("%.2f", price);
     }
+
+	public String getFilter() {
+		return filter;
+	}
+
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
 
 }

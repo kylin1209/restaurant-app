@@ -1,4 +1,4 @@
-package src;
+package main;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,19 +6,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * GUI screen for deliverer login.
+ * GUI screen for deliverer sign-up.
  */
-public class DelivererLoginGUI extends JPanel {
-    private AppController controller;
+public class DelivererSignUpGUI extends JPanel {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
     private JTextField usernameField;
     private JPasswordField passwordField;
+    private JPasswordField confirmPasswordField;
 
     /**
-     * Constructor for DelivererLoginGUI.
+     * Constructor for DelivererSignUpGUI.
      * @param controller The main application controller.
      */
-    public DelivererLoginGUI(AppController controller) {
-        this.controller = controller;
+    public DelivererSignUpGUI(AppController controller) {
+        this.setController(controller);
         setLayout(new GridBagLayout()); // Use GridBagLayout for flexible centering
         setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add padding
 
@@ -30,7 +35,7 @@ public class DelivererLoginGUI extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
 
         // Title Label
-        JLabel titleLabel = new JLabel("Deliverer Login", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Deliverer Sign Up", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         gbc.gridwidth = 2; // Span two columns
         add(titleLabel, gbc);
@@ -62,52 +67,60 @@ public class DelivererLoginGUI extends JPanel {
         gbc.gridx = 1;
         add(passwordField, gbc);
 
+        // Confirm Password Label and Field
+        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
+        confirmPasswordLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        gbc.gridy++;
+        gbc.gridx = 0;
+        add(confirmPasswordLabel, gbc);
+
+        confirmPasswordField = new JPasswordField(20); // 20 columns wide
+        confirmPasswordField.setFont(new Font("Arial", Font.PLAIN, 18));
+        gbc.gridx = 1;
+        add(confirmPasswordField, gbc);
+
         gbc.gridwidth = 2; // Span two columns for buttons
         gbc.insets = new Insets(20, 0, 10, 0); // More padding for buttons
         gbc.ipadx = 50; // Increase button width
         gbc.ipady = 15; // Increase button height
 
-        // Login Button
-        JButton loginButton = new JButton("Login");
-        loginButton.setFont(new Font("Arial", Font.BOLD, 20));
-        loginButton.addActionListener(new ActionListener() {
+        // Sign Up Button
+        JButton signUpButton = new JButton("Sign Up");
+        signUpButton.setFont(new Font("Arial", Font.BOLD, 20));
+        signUpButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
-                // Delegate login logic to AppController
-                controller.handleDelivererLogin(username, password);
+                String confirmPassword = new String(confirmPasswordField.getPassword());
+                // Delegate signup logic to AppController
+                controller.handleDelivererSignUp(username, password, confirmPassword);
             }
         });
         gbc.gridy++;
         gbc.gridx = 0;
-        add(loginButton, gbc);
-
-        gbc.insets = new Insets(10, 0, 20, 0); // Padding for signup button
-
-        // Sign Up Button
-        JButton signUpButton = new JButton("Don't have an account? Sign Up");
-        signUpButton.setFont(new Font("Arial", Font.PLAIN, 16));
-        signUpButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.showDelivererSignUpGUI();
-            }
-        });
-        gbc.gridy++;
         add(signUpButton, gbc);
 
-        // Back to Role Selection Button
-        JButton backButton = new JButton("Back to Role Selection");
+        gbc.insets = new Insets(10, 0, 20, 0); // Padding for back button
+
+        // Back to Login Button
+        JButton backButton = new JButton("Back to Login");
         backButton.setFont(new Font("Arial", Font.PLAIN, 16));
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.showLoginSelectionGUI();
+                controller.showDelivererLoginGUI();
             }
         });
         gbc.gridy++;
         add(backButton, gbc);
     }
-}
 
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
+}

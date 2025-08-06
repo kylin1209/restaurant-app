@@ -1,14 +1,17 @@
-package src;
+package main;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * GUI for deliverers to view detailed order information.
  */
 public class DelivererOrderDetailsGUI extends JPanel {
-    private AppController controller;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
     private Order order;
     private boolean isOrderPickedUp; // Flag to track if the order has been picked up
 
@@ -21,8 +24,8 @@ public class DelivererOrderDetailsGUI extends JPanel {
      * @param order The order whose details are to be displayed.
      */
     public DelivererOrderDetailsGUI(AppController controller, Order order) {
-        this.controller = controller;
-        this.order = order;
+        this.setController(controller);
+        this.setOrder(order);
         
         // Initialize isOrderPickedUp based on the current order status
         this.isOrderPickedUp = order.getStatus().equals("Picked Up");
@@ -111,4 +114,20 @@ public class DelivererOrderDetailsGUI extends JPanel {
         buttonPanel.add(pickupDeliveredButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
+
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
 }

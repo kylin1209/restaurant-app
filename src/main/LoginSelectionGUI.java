@@ -1,5 +1,4 @@
-package src;
-
+package main;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,14 +8,18 @@ import java.awt.event.ActionListener;
  * The initial GUI screen allowing users to choose between Customer or Deliverer login.
  */
 public class LoginSelectionGUI extends JPanel {
-    private AppController controller;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
 
     /**
      * Constructor for LoginSelectionGUI.
      * @param controller The main application controller.
      */
     public LoginSelectionGUI(AppController controller) {
-        this.controller = controller;
+        this.setController(controller);
         setLayout(new GridBagLayout()); // Use GridBagLayout for flexible centering
         setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50)); // Add padding
 
@@ -55,11 +58,18 @@ public class LoginSelectionGUI extends JPanel {
         customerLoginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(LoginSelectionGUI.this, "Customer login is not yet implemented.", "Coming Soon", JOptionPane.INFORMATION_MESSAGE);
-                // controller.showCustomerLoginGUI(); // Placeholder for future customer login screen
+            	controller.showCustomerLoginGUI(); 
             }
         });
         gbc.gridy++;
         add(customerLoginButton, gbc);
     }
+
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
 }

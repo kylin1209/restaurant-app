@@ -1,28 +1,23 @@
-package src;
-
+package main;
 
 import javax.swing.*;
-
-import src.AppController;
-import src.Deliverer;
-import src.Order;
-
 import java.awt.*;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The GUI for a deliverer to view their past deliveries.
  */
 public class DelivererPastOrdersGUI extends JPanel {
-    private AppController controller;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AppController controller;
     private DefaultListModel<String> pastDeliveriesListModel;
     private JList<String> pastDeliveriesJList;
     private Deliverer deliverer; // Added as an instance variable
 
     public DelivererPastOrdersGUI(AppController controller, Deliverer deliverer) {
-        this.controller = controller;
+        this.setController(controller);
         this.deliverer = deliverer; // Initialize the instance variable
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -73,5 +68,12 @@ public class DelivererPastOrdersGUI extends JPanel {
             }
         }
     }
-}
 
+	public AppController getController() {
+		return controller;
+	}
+
+	public void setController(AppController controller) {
+		this.controller = controller;
+	}
+}

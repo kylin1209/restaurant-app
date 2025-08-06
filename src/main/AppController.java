@@ -1,12 +1,8 @@
-package src;
+package main;
+
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -25,6 +21,15 @@ public class AppController {
     private LoginSelectionGUI loginSelectionGUI;
     private DelivererLoginGUI delivererLoginGUI;
     private DelivererSignUpGUI delivererSignUpGUI;
+    private CustomerAccountGUI customerAccountGUI;
+    private CustomerCartGUI customerCartGUI;
+    private CustomerLoginGUI customerLoginGUI;
+    private CustomerMapGUI customerMapGUI;
+    private CustomerOrderMenuGUI customerOrderMenuGUI;
+    private CustomerPastOrdersGUI customerPastOrdersGUI;
+    private CustomerPaymentGUI customerPaymentGUI;
+    private CustomerSignUpGUI customerSignUpGUI;
+    private CustomerOtherOptGUI customerOtherOptGUI;
 
     // A temporary holder for the order currently being viewed in DelivererOrderDetailsGUI
     private Order currentlyViewedOrder;
@@ -68,29 +73,31 @@ public class AppController {
         }
         this.currentCustomer = accountManager.getCustomerAccounts().get(0); // Set a dummy customer for order creation
 
-        // Create some dummy orders with MenuItems directly
-        // These orders will be added to the allOrders list, which is not persisted
-        // In a real app, orders would likely be managed by a separate persistence mechanism
-        List<MenuItem> order1Items = new ArrayList<>();
-        order1Items.add(new MenuItem("Burger", 10.00));
-        order1Items.add(new MenuItem("Fries", 3.00));
-        Order order1 = new Order("ORD-001", "Pending", "456 Oak Avenue", order1Items);
-
-        List<MenuItem> order2Items = new ArrayList<>();
-        order2Items.add(new MenuItem("Soda", 1.99));
-        order2Items.add(new MenuItem("Pizza", 15.00));
-        Order order2 = new Order("ORD-002", "Pending", "789 Pine Lane", order2Items);
-
-        this.allOrders.add(order1);
-        this.allOrders.add(order2);
-        
-        // Link customer to their dummy order (for testing delivery status updates)
-        this.currentCustomer.setCurrentOrder(order1);
+//        // Create some dummy orders with MenuItems directly
+//        // These orders will be added to the allOrders list, which is not persisted
+//        // In a real app, orders would likely be managed by a separate persistence mechanism
+//        List<MenuItem> order1Items = new ArrayList<>();
+//        order1Items.add(new MenuItem("Burger", 10.00));
+//        order1Items.add(new MenuItem("Fries", 3.00));
+//        Order order1 = new Order("Pending", "456 Oak Avenue", order1Items);
+//
+//        List<MenuItem> order2Items = new ArrayList<>();
+//        order2Items.add(new MenuItem("Soda", 1.99));
+//        order2Items.add(new MenuItem("Pizza", 15.00));
+//        Order order2 = new Order("Pending", "789 Pine Lane", order2Items);
+//
+//        this.allOrders.add(order1);
+//        this.allOrders.add(order2);
+//        
+//        // Link customer to their dummy order (for testing delivery status updates)
+//        this.currentCustomer.setCurrentOrder(order1);
 
         // Initialize all main GUI panels
         this.loginSelectionGUI = new LoginSelectionGUI(this);
         this.delivererLoginGUI = new DelivererLoginGUI(this);
         this.delivererSignUpGUI = new DelivererSignUpGUI(this);
+        this.customerLoginGUI = new CustomerLoginGUI(this);
+        this.customerSignUpGUI = new CustomerSignUpGUI(this);
         // delivererBookOrderGUI will be initialized upon successful deliverer login
 
         // Show the initial GUI (Login Selection)
@@ -267,7 +274,7 @@ public class AppController {
             // Assign the order to the current deliverer
             currentDeliverer.setCurrentOrder(this.currentlyViewedOrder);
             // Update the order status
-            this.currentlyViewedOrder.setStatus("Picked Up");
+            this.currentlyViewedOrder.setStatus("Booked");
             
             // Save accounts after an order is picked up
             AccountManager.getInstance().saveAccounts();
@@ -292,8 +299,10 @@ public class AppController {
     public void handleOrderDelivered() {
         Order deliveredOrder = currentDeliverer.getCurrentOrder();
         if (deliveredOrder != null && deliveredOrder.getStatus().equals("Picked Up")) {
-            double earnings = 5.0; // Hardcoded earnings for simplicity
+            double earnings = deliveredOrder.getTotalPrice(); 
             deliveredOrder.setStatus("Delivered");
+            currentCustomer.getCurrentOrder().setStatus("Delivered");
+            currentCustomer.addToPastOrders(deliveredOrder);
             currentDeliverer.addPastDelivery(deliveredOrder);
             currentDeliverer.setCurrentOrder(null); // Clear the active order for the deliverer
             
@@ -359,6 +368,148 @@ public class AppController {
         }
         return null;
     }
+    
+    
+    public void showCustomerAccountGUI() {
+    	this.customerAccountGUI = new CustomerAccountGUI(this, currentCustomer);
+    	showPanel(customerAccountGUI, "My Account");
+    }
+    
+	public void showCustomerCartGUI() {
+		this.customerCartGUI = new CustomerCartGUI(this, currentCustomer);
+		showPanel(customerCartGUI, "Cart");
+	}
+	
+	public void showCustomerLoginGUI() {
+		showPanel(customerLoginGUI, "Customer Login");
+	}
+	
+	public void showCustomerMapGUI() {
+	    this.customerMapGUI = new CustomerMapGUI(this, currentCustomer);
+	    showPanel(customerMapGUI, "Current Order Status");
+
+	}
+	
+	public void showCustomerOrderMenuGUI() {
+	    this.customerOrderMenuGUI = new CustomerOrderMenuGUI(this, currentCustomer);
+	    showPanel(customerOrderMenuGUI, "Order Menu");
+
+	}
+	
+	public void showCustomerPastOrdersGUI() {
+	    this.customerPastOrdersGUI = new CustomerPastOrdersGUI(this, currentCustomer);
+	    showPanel(customerPastOrdersGUI, "Past Orders");
+
+	}
+	
+	public void showCustomerPaymentGUI() {
+	    this.customerPaymentGUI = new CustomerPaymentGUI(this, currentCustomer);
+		showPanel(customerPaymentGUI, "Payment");
+	}
+	
+	public void showCustomerOtherOptGUI() {
+	    this.customerOtherOptGUI = new CustomerOtherOptGUI(this, currentCustomer);
+		showPanel(customerOtherOptGUI, "Options");
+	}
+	
+	public void showCustomerSignUpGUI() {
+		showPanel(customerSignUpGUI, "Customer Sign Up");
+	}
+	
+	 public void returnToCustomerOrderMenu() {
+	    showCustomerOrderMenuGUI();
+	 }
+	 
+	 public void handleCustomerLogin(String username, String password) {
+        AccountManager accountManager = AccountManager.getInstance();
+        Customer customer = null;
+        for (Customer c : accountManager.getCustomerAccounts()) {
+            if (c.getUsername().equals(username) && c.getPassword().equals(password)) {
+                customer = c;
+                break;
+            }
+        }
+
+        if (customer != null) {
+            this.currentCustomer = customer;
+            JOptionPane.showMessageDialog(mainFrame, "Login successful! Welcome, " + username + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
+            showCustomerOrderMenuGUI();
+        } else {
+            JOptionPane.showMessageDialog(mainFrame, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        }
+	 }
+	 
+	 public void handleCustomerSignUp(String username, String password, String confirmPassword, String address) {
+	        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || address.isEmpty()) {
+	            JOptionPane.showMessageDialog(mainFrame, "All fields are required.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        if (!password.equals(confirmPassword)) {
+	            JOptionPane.showMessageDialog(mainFrame, "Passwords do not match.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+
+	        AccountManager accountManager = AccountManager.getInstance();
+	        // Check if username already exists
+	        for (Customer c : accountManager.getCustomerAccounts()) {
+	            if (c.getUsername().equals(username)) {
+	                JOptionPane.showMessageDialog(mainFrame, "Username already exists. Please choose a different one.", "Sign Up Failed", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
+	        }
+
+	        // Create new customer account
+	        Customer newCustomer = new Customer(username, password, address);
+	        accountManager.getCustomerAccounts().add(newCustomer);
+	        // Save accounts immediately after a new one is created
+	        accountManager.saveAccounts(); 
+	        JOptionPane.showMessageDialog(mainFrame, "Account created successfully! Please log in.", "Sign Up Success", JOptionPane.INFORMATION_MESSAGE);
+	        showCustomerLoginGUI(); // Go back to login screen after successful signup
+	    }
+	 
+    public void handleCustomerOrderPayment(String security, String cardNo, String zip) {
+    	// need to check if customer's cart is empty or not!
+    	if (currentCustomer.getCart().isEmpty()) {
+            JOptionPane.showMessageDialog(mainFrame, "Your cart is empty!", "Payment Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+    	}
+    	if (currentCustomer.getCurrentOrder() != null) {
+            JOptionPane.showMessageDialog(mainFrame, "You already have a delivery in progress, please wait until that one has been delivered.", "Payment Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+    	}
+    	if (security.isEmpty() || cardNo.isEmpty() || zip.isEmpty()) {
+            JOptionPane.showMessageDialog(mainFrame, "All fields are required.", "Payment Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        } else {
+        	Order newOrder = new Order("Pending", currentCustomer.getAddress(), currentCustomer.getCart());
+        	currentCustomer.setCurrentOrder(newOrder);
+        	this.allOrders.add(newOrder);
+        	AccountManager.getInstance().saveAccounts();
+        	currentCustomer.resetCart();
+        	showCustomerMapGUI(); // delivery screen
+        }
+	}
+    
+    public void handleCustomerOrderBooked() {
+    	currentCustomer.getCurrentOrder().setStatus("Booked");
+    	AccountManager.getInstance().saveAccounts();
+    }
+    
+    public void handleCustomerOrderDelivered() {
+    	currentCustomer.getCurrentOrder().setStatus("Delivered");
+    	currentCustomer.addToPastOrders(currentCustomer.getCurrentOrder());
+    	AccountManager.getInstance().saveAccounts();
+    	currentCustomer.setCurrentOrder(null);
+    }
+    
+    
+    public void showChangeAddrErr() {
+        JOptionPane.showMessageDialog(mainFrame, "Address Field is Empty.", "Change Address Failed", JOptionPane.ERROR_MESSAGE);
+	}
+    
+    public List<Order> getAllOrders() {
+    	return this.allOrders;
+    }
 
     /**
      * The main method to run the application.
@@ -369,4 +520,8 @@ public class AppController {
             app.initializeApp();
         });
     }
+
+	
+
+	
 }
