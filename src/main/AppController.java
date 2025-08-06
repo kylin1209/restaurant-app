@@ -30,6 +30,7 @@ public class AppController {
     private CustomerPaymentGUI customerPaymentGUI;
     private CustomerSignUpGUI customerSignUpGUI;
     private CustomerOtherOptGUI customerOtherOptGUI;
+    private DelivererPastOrdersGUI delivererPastOrdersGUI;
 
     // A temporary holder for the order currently being viewed in DelivererOrderDetailsGUI
     private Order currentlyViewedOrder;
@@ -297,38 +298,66 @@ public class AppController {
      * Sets the order status to "Delivered" and updates records.
      */
     public void handleOrderDelivered() {
-        Order deliveredOrder = currentDeliverer.getCurrentOrder();
-        if (deliveredOrder != null && deliveredOrder.getStatus().equals("Picked Up")) {
-            double earnings = deliveredOrder.getTotalPrice(); 
-            deliveredOrder.setStatus("Delivered");
+    Order deliveredOrder = currentDeliverer.getCurrentOrder();
+
+    if (deliveredOrder != null && "Picked Up".equals(deliveredOrder.getStatus())) {
+        double earnings = deliveredOrder.getTotalPrice();
+
+        // Update order status
+        deliveredOrder.setStatus("Delivered");
+
+        // Update customer record
+        if (currentCustomer != null && currentCustomer.getCurrentOrder() == deliveredOrder) {
             currentCustomer.getCurrentOrder().setStatus("Delivered");
             currentCustomer.addToPastOrders(deliveredOrder);
-            currentDeliverer.addPastDelivery(deliveredOrder);
-            currentDeliverer.setCurrentOrder(null); // Clear the active order for the deliverer
-            
-            // Save accounts after an order is delivered
-            AccountManager.getInstance().saveAccounts();
-
-            showDelivererThankYouGUI(earnings); // Navigate to the thank you screen
-        } else {
-            JOptionPane.showMessageDialog(mainFrame, "No active order to deliver or order not yet picked up.", "Error", JOptionPane.ERROR_MESSAGE);
+            currentCustomer.setCurrentOrder(null);
         }
+
+        // Update deliverer record
+        currentDeliverer.addPastDelivery(deliveredOrder);
+        currentDeliverer.setCurrentOrder(null);
+
+        // Persist changes
+        AccountManager.getInstance().saveAccounts();
+
+        // Refresh GUI components
+        if (delivererBookOrderGUI != null) {
+            delivererBookOrderGUI.updateGUI();
+        }
+        if (delivererPastOrdersGUI != null) {
+            delivererPastOrdersGUI.refreshPastDeliveries();
+        }
+
+        // Navigate to thank-you screen
+        showDelivererThankYouGUI(earnings);
+    } else {
+        JOptionPane.showMessageDialog(mainFrame,
+            "No active order to deliver or order not yet picked up.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
     }
-    
+}
+
     /**
      * Displays the deliverer's past deliveries GUI.
      */
     public void showDelivererPastOrdersGUI() {
-        DelivererPastOrdersGUI pastOrdersGUI = new DelivererPastOrdersGUI(this, currentDeliverer);
-        pastOrdersGUI.refreshPastDeliveries(); // Ensure the list is updated
-        showPanel(pastOrdersGUI, "Deliverer: Past Deliveries");
+        // Create and store the GUI instance so it can be refreshed later
+        delivererPastOrdersGUI = new DelivererPastOrdersGUI(this, currentDeliverer);
+
+        // Ensure the list is populated with the latest past deliveries
+        delivererPastOrdersGUI.refreshPastDeliveries();
+
+        // Display the panel
+        showPanel(delivererPastOrdersGUI, "Deliverer: Past Deliveries");
+
     }
 
     /**
      * Displays the thank you screen for a completed delivery.
      * @param earnings The earnings from the completed delivery.
      */
-    private void showDelivererThankYouGUI(double earnings) {
+    void showDelivererThankYouGUI(double earnings) {
         DelivererThankYouGUI thankYouGUI = new DelivererThankYouGUI(this, earnings);
         showPanel(thankYouGUI, "Deliverer: Delivery Complete");
     }
