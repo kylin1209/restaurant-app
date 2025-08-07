@@ -8,17 +8,17 @@ import java.awt.*;
  */
 public class DelivererPastOrdersGUI extends JPanel {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private AppController controller;
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private AppController controller;
     private DefaultListModel<String> pastDeliveriesListModel;
     private JList<String> pastDeliveriesJList;
-    private Deliverer deliverer; // Added as an instance variable
+    private Deliverer deliverer; 
 
     public DelivererPastOrdersGUI(AppController controller, Deliverer deliverer) {
         this.setController(controller);
-        this.deliverer = deliverer; // Initialize the instance variable
+        this.deliverer = deliverer; 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -60,20 +60,26 @@ public class DelivererPastOrdersGUI extends JPanel {
     /**
      * Refreshes the list of past deliveries displayed in the GUI.
      */
-    public void refreshPastDeliveries() { // Made public and added implementation
+    public void refreshPastDeliveries() {
         pastDeliveriesListModel.clear();
         if (deliverer != null && deliverer.getPastDeliveries() != null) {
             for (Order order : deliverer.getPastDeliveries()) {
-                pastDeliveriesListModel.addElement("Delivered Order ID: " + order.getOrderID() + " to " + order.getDestinationAddress());
+                pastDeliveriesListModel.addElement(
+                    String.format("Order ID: %s | To: %s | Earnings: $%.2f",
+                        order.getOrderID(),
+                        order.getDestinationAddress(),
+                        order.getTotalPrice()
+                    )
+                );
             }
         }
     }
 
-	public AppController getController() {
-		return controller;
-	}
+    public AppController getController() {
+        return controller;
+    }
 
-	public void setController(AppController controller) {
-		this.controller = controller;
-	}
+    public void setController(AppController controller) {
+        this.controller = controller;
+    }
 }

@@ -65,28 +65,26 @@ public class DelivererOrderDetailsGUI extends JPanel {
 
         updateButtonState();
 
-        pickupDeliveredButton.addActionListener(e -> {
-            String status = order.getStatus();
+       pickupDeliveredButton.addActionListener(e -> {
+    String status = order.getStatus();
 
-            if (status.equals("Pending")) {
-                order.setStatus("Booked");
-                updateButtonState();  // Button becomes "Order Delivered"
-            } else if (status.equals("Booked")) {
-                order.setStatus("Delivered");
-                controller.showDelivererThankYouGUI(order.getTotalPrice()); // Final screen
-            }
+    if (status.equals("Pending")) {
+        controller.handleOrderPickup(); // Use controller method instead of direct modification
+    } else if (status.equals("Booked")) {
+        controller.handleOrderDelivered(); // Use controller method instead of direct modification
+    }
+});
 
-            updateButtonState(); // Refresh button and label
-        });
-
-        cancelButton.addActionListener(e -> {
-            if (order.getStatus().equals("Pending")) {
-                JOptionPane.showMessageDialog(this, "Order " + order.getOrderID() + " has been cancelled.", "Order Cancelled", JOptionPane.INFORMATION_MESSAGE);
-                controller.returnToDelivererMenu();
-            } else {
-                JOptionPane.showMessageDialog(this, "You cannot cancel an order that has already been picked up.", "Cannot Cancel", JOptionPane.WARNING_MESSAGE);
-            }
-        });
+cancelButton.addActionListener(e -> {
+    if (order.getStatus().equals("Pending")) {
+        controller.returnToDelivererMenu();
+    } else {
+        JOptionPane.showMessageDialog(this, 
+            "You cannot cancel an order that has already been picked up.", 
+            "Cannot Cancel", 
+            JOptionPane.WARNING_MESSAGE);
+    }
+});
 
         buttonPanel.add(cancelButton);
         buttonPanel.add(pickupDeliveredButton);

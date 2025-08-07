@@ -271,27 +271,23 @@ public class AppController {
      * This method no longer navigates away, allowing the details GUI to update its state.
      */
     public void handleOrderPickup() {
-        if (this.currentlyViewedOrder != null && this.currentlyViewedOrder.getStatus().equals("Pending")) {
-            // Assign the order to the current deliverer
-            currentDeliverer.setCurrentOrder(this.currentlyViewedOrder);
-            // Update the order status
-            this.currentlyViewedOrder.setStatus("Booked");
-            
-            // Save accounts after an order is picked up
-            AccountManager.getInstance().saveAccounts();
-
-            JOptionPane.showMessageDialog(mainFrame, "Order " + this.currentlyViewedOrder.getOrderID() + " has been picked up. Please proceed to delivery.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            
-            // Re-display the current details GUI to refresh its state
-            // This will ensure the button text changes to "Order Delivered"
-            showDelivererOrderDetailsGUI(currentDeliverer.getCurrentOrder()); 
-        } else if (currentDeliverer.getCurrentOrder() != null && currentDeliverer.getCurrentOrder().getStatus().equals("Picked Up")) {
-             // This case handles if they hit "Order Pickup" again after it's already picked up
-             JOptionPane.showMessageDialog(mainFrame, "Order is already picked up.", "Info", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(mainFrame, "No pending order to pick up or order already active.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    if (this.currentlyViewedOrder != null && this.currentlyViewedOrder.getStatus().equals("Pending")) {
+        // Assign the order to the current deliverer
+        currentDeliverer.setCurrentOrder(this.currentlyViewedOrder);
+        // Update the order status
+        this.currentlyViewedOrder.setStatus("Booked");
+        
+        AccountManager.getInstance().saveAccounts();
+        
+        // Refresh the view
+        showDelivererOrderDetailsGUI(currentDeliverer.getCurrentOrder());
+    } else {
+        JOptionPane.showMessageDialog(mainFrame, 
+            "No pending order to pick up or order already active.", 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
     }
+}
 
     /**
      * Handles the logic for a deliverer completing a delivery.
@@ -299,8 +295,8 @@ public class AppController {
      */
     public void handleOrderDelivered() {
     Order deliveredOrder = currentDeliverer.getCurrentOrder();
-
-    if (deliveredOrder != null && "Picked Up".equals(deliveredOrder.getStatus())) {
+    
+    if (deliveredOrder != null && "Booked".equals(deliveredOrder.getStatus())) {
         double earnings = deliveredOrder.getTotalPrice();
 
         // Update order status
@@ -379,10 +375,6 @@ public class AppController {
         this.currentlyViewedOrder = null; // Clear any viewed order
         showLoginSelectionGUI(); // Go back to the role selection screen
     }
-
-    // ===================================================================================
-    // Utility Method
-    // ===================================================================================
 
     /**
      * Finds an order in the list by its ID.
