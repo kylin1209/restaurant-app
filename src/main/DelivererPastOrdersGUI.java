@@ -15,6 +15,7 @@ public class DelivererPastOrdersGUI extends JPanel {
     private DefaultListModel<String> pastDeliveriesListModel;
     private JList<String> pastDeliveriesJList;
     private Deliverer deliverer; 
+    private JButton menuButton;
 
     public DelivererPastOrdersGUI(AppController controller, Deliverer deliverer) {
         this.setController(controller);
@@ -22,26 +23,42 @@ public class DelivererPastOrdersGUI extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Create a new panel for the top section
+    // Create a new panel for the top section
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        // Panel for the Back button on the left
+        // Left side for hamburger menu button
         JPanel leftTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        menuButton = new JButton("☰ Menu");
+        menuButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        leftTopPanel.add(menuButton);
+
+        // Right side for back button
+        JPanel rightTopPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
         backButton.addActionListener(e -> controller.returnToDelivererMenu());
-        leftTopPanel.add(backButton);
+        rightTopPanel.add(backButton);
+
+        // Add to top panel
+        topPanel.add(leftTopPanel, BorderLayout.WEST);
+        topPanel.add(rightTopPanel, BorderLayout.EAST);
+
+        // Hamburger menu popup
+        JPopupMenu hamburgerMenu = new JPopupMenu();
+        JMenuItem availableOrdersItem = new JMenuItem("Available Orders");
+        availableOrdersItem.addActionListener(e -> controller.returnToDelivererMenu());
+        JMenuItem logoutItem = new JMenuItem("Log Out");
+        logoutItem.addActionListener(e -> controller.showLoginGUI());
+        hamburgerMenu.add(availableOrdersItem);
+        hamburgerMenu.add(logoutItem);
+        menuButton.addActionListener(e -> hamburgerMenu.show(menuButton, 0, menuButton.getHeight()));
 
         // Title Label
         JLabel titleLabel = new JLabel("Past Deliveries", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        
-        topPanel.add(leftTopPanel, BorderLayout.WEST);
         topPanel.add(titleLabel, BorderLayout.CENTER);
-
         add(topPanel, BorderLayout.NORTH);
-
         // Create the list of past deliveries
         pastDeliveriesListModel = new DefaultListModel<>();
         pastDeliveriesJList = new JList<>(pastDeliveriesListModel);

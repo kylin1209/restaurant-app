@@ -15,6 +15,7 @@ public class DelivererOrderDetailsGUI extends JPanel {
     private JButton pickupDeliveredButton;
     private JButton cancelButton;
     private JLabel statusLabel;
+    private JButton menuButton;
 
     public DelivererOrderDetailsGUI(AppController controller, Order order) {
         this.controller = controller;
@@ -25,13 +26,35 @@ public class DelivererOrderDetailsGUI extends JPanel {
 
         // Top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel leftTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        menuButton = new JButton("☰ Menu");
+        menuButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        leftTopPanel.add(menuButton);
+
+        JPanel rightTopPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        backButton.addActionListener(e -> controller.returnToDelivererMenu());
+        rightTopPanel.add(backButton);
+
+        topPanel.add(leftTopPanel, BorderLayout.WEST);
+        topPanel.add(rightTopPanel, BorderLayout.EAST);
+
+        // Title Label
         JLabel titleLabel = new JLabel("Order Details - " + order.getOrderID(), SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> controller.returnToDelivererMenu());
-        topPanel.add(backButton, BorderLayout.WEST);
+        // Hamburger menu popup
+        JPopupMenu hamburgerMenu = new JPopupMenu();
+        JMenuItem pastDeliveriesItem = new JMenuItem("Past Deliveries");
+        pastDeliveriesItem.addActionListener(e -> controller.showDelivererPastOrdersGUI());
+        JMenuItem logoutItem = new JMenuItem("Log Out");
+        logoutItem.addActionListener(e -> controller.showLoginGUI());
+        hamburgerMenu.add(pastDeliveriesItem);
+        hamburgerMenu.add(logoutItem);
+        menuButton.addActionListener(e -> hamburgerMenu.show(menuButton, 0, menuButton.getHeight()));
+
         add(topPanel, BorderLayout.NORTH);
 
         // Details Panel
